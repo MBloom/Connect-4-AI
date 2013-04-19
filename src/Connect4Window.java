@@ -6,13 +6,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.ButtonModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.ListModel;
+import javax.swing.SwingConstants;
 
 import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
@@ -49,6 +53,15 @@ public class Connect4Window extends javax.swing.JFrame implements
 	private JPanel[][] grid;
 	private GameBoard board;
 	private JLabel connectLabel;
+	
+	private JRadioButton random = new JRadioButton("Random" , true);
+	private JLabel randomLabel = new JLabel("Random");
+	private JRadioButton minmax;
+	private JLabel minmaxLabel = new JLabel("MinMax");
+	private ButtonGroup algorithmsGroup;
+	/**
+	 * @wbp.nonvisual location=902,349
+	 */
 
 	/**
 	 * Auto-generated main method to display this JFrame
@@ -181,6 +194,27 @@ public class Connect4Window extends javax.swing.JFrame implements
 					numConnect.setText("4");
 					numConnect.setBounds(147, 211, 21, 21);
 				}
+				{
+					random.setBounds(100, 258, 20, 20);
+					SettingsPanel.add(random);
+					SettingsPanel.add(randomLabel);
+					randomLabel.setBounds(14, 250, 105, 35);
+					randomLabel.setFont(new java.awt.Font("Segoe UI", 0, 14));
+
+				}
+				{
+					minmax = new JRadioButton("MinMax");
+					SettingsPanel.add(minmax);
+					SettingsPanel.add(minmaxLabel);
+					minmaxLabel.setFont(new java.awt.Font("Segoe UI", 0, 14));
+					minmaxLabel.setBounds(14, 282, 105, 35);
+					minmax.setBounds(100, 290, 20, 20);
+				}
+				{
+					algorithmsGroup = new ButtonGroup();
+					algorithmsGroup.add(random);
+					algorithmsGroup.add(minmax);
+				}
 			}
 			{
 				gameGrid = new JPanel();
@@ -236,13 +270,25 @@ public class Connect4Window extends javax.swing.JFrame implements
 			if(board.checkUserWin(rowLoc, dropLoc)) {
 				System.out.print("You Win!");
 			}
-			int compColLoc = board.dropComp(1);
-			int compRowLoc = board.dropCompPiece(compColLoc);
-			grid[compRowLoc][compColLoc].setBackground(new java.awt.Color(0, 0,
-					0));
-			if(board.checkCompWin(compRowLoc, compColLoc)) {
-				System.out.print("Computer Wins!");
+			if(random.isSelected()) {
+				int compCol = board.randomDrop();
+				int compRow = board.dropCompPiece(compCol);
+				grid[compRow][compCol].setBackground(new java.awt.Color(0, 0,
+						0));
 			}
+			if(minmax.isSelected()) {
+				int compCol = board.randomWithDefenseDrop();
+				int compRow = board.dropCompPiece(compCol);
+				grid[compRow][compCol].setBackground(new java.awt.Color(0, 0,
+						0));
+			}
+//			int compColLoc = board.dropComp(1);
+//			int compRowLoc = board.dropCompPiece(compColLoc);
+//			grid[compRowLoc][compColLoc].setBackground(new java.awt.Color(0, 0,
+//					0));
+//			if(board.checkCompWin(compRowLoc, compColLoc)) {
+//				System.out.print("Computer Wins!");
+//			}
 		}
 		board.print();
 		
