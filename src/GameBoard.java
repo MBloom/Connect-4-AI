@@ -5,6 +5,8 @@ public class GameBoard {
 	private int columns;
 	private int[][] board;
 	private int connect;
+	private int max = 100;
+	private int min = -100;
 
 	public GameBoard(int r, int c, int num) {
 		rows = r;
@@ -40,7 +42,7 @@ public class GameBoard {
 		return -1;
 	}
 
-	public int dropCompPiece(int col) {
+	public int dropComp(int col) {
 		for (int k = rows - 1; k >= 0; k--) {
 			if (board[k][col] == 0) {
 				board[k][col] = 2;
@@ -50,53 +52,9 @@ public class GameBoard {
 		return -1;
 	}
 
-	public int dropComp(int difficulty) {
-		int[] choices = new int[columns];
-		for (int i = 0; i < columns; i++) {
-			GameBoard tempBoard = new GameBoard(rows, columns, connect, board);
-			int compRowLoc = tempBoard.dropCompPiece(i);
-			if (compRowLoc == -1) {
-				choices[i] = -100;
-				continue;
-			} else {
-				tempBoard.board[compRowLoc][i] = 2;
-			}
-			if (tempBoard.checkCompWin(compRowLoc, i)) {
-				choices[i] = 100;
-				continue;
-			}
-			for (int k = 0; k < columns; k++) {
-				int userRow = tempBoard.dropUser(k);
-				if (userRow != -1) {
-					if (tempBoard.checkCompWin(userRow, k)) {
-						choices[i] = -100;
-						break;
-					}
-					tempBoard.board[userRow][k] = 0;
-				}
-			}
-			if (choices[i] == -100)
-				continue;
-			else
-				choices[i] = 50;
-		}
-		int fity = -1;
-		int lose = 0;
-		for (int i = 0; i < columns; i++) {
-			if (choices[i] == 100)
-				return i;
-			else if (choices[i] == 50)
-				fity = i;
-		}
-		if (fity != -1)
-			return fity;
-		else
-			return lose;
-	}
-
 	public int randomDrop() {
 		for (int i = 0; i < columns; i++) {
-			int rowLoc = dropCompPiece(i);
+			int rowLoc = dropComp(i);
 			if (rowLoc != -1) {
 				board[rowLoc][i] = 2;
 				if (checkCompWin(rowLoc, i)) {
@@ -112,7 +70,7 @@ public class GameBoard {
 
 	public int randomWithDefenseDrop() {
 		for (int i = 0; i < columns; i++) {
-			int rowLoc = dropCompPiece(i);
+			int rowLoc = dropComp(i);
 			if (rowLoc != -1) {
 				board[rowLoc][i] = 2;
 				if (checkCompWin(rowLoc, i)) {
@@ -135,6 +93,102 @@ public class GameBoard {
 		}
 		Random generator = new Random();
 		return generator.nextInt(columns);
+	}
+
+	/************************* MINIMAX CODE ************************************/
+	public int minimax(int diff) {
+		if (diff == 0)
+			return -1;
+		int bestDecision = -1;
+		int bestCol = 0;
+		for (int j = 0; j < columns; j++) {
+			if (!isFull(j)) {
+				int lastRow = dropComp(j);
+				int decision = userRecursion(diff - 1, bestDecision, lastRow, j);
+				if (decision > bestDecision) {
+					bestDecision = decision;
+					bestCol = j;
+				}
+				undoMove(j);
+			}
+		}
+		return bestCol;
+	}
+
+	public int userRecursion(int diff, int prevMin, int lastRowLoc,
+			int lastColLoc) {
+		if (diff == 0)
+			return heuristic(2, lastRowLoc, lastColLoc);
+		int bestCompDecision = -1;
+		for (int j = 0; j < columns; j++) {
+			if (!isFull(j)) {
+				int lastRow = dropUser(j);
+				if (checkUserWin(lastRow, j)) {
+					undoMove(j);
+					return -1;
+				}
+				int decision = compRecursion(diff - 1, bestCompDecision,
+						lastRow, j);
+				if (bestCompDecision < decision) {
+					bestCompDecision = decision;
+				}
+				undoMove(j);
+			}
+		}
+		return bestCompDecision;
+	}
+
+	public int compRecursion(int diff, int prevMax, int lastRowLoc,
+			int lastColLoc) {
+		if (diff == 0)
+			return heuristic(1, lastRowLoc, lastColLoc);
+		int bestCompDecision = -1;
+		for (int j = 0; j < columns; j++) {
+			if (!isFull(j)) {
+				int rowLoc = dropComp(j);
+				if (checkCompWin(rowLoc, j)) {
+					undoMove(j);
+					return 1;
+				}
+				int decision = userRecursion(diff - 1, bestCompDecision,
+						rowLoc, j);
+				if (decision > bestCompDecision) {
+					bestCompDecision = decision;
+				}
+				undoMove(j);
+			}
+		}
+		return bestCompDecision;
+	}
+
+	public void undoMove(int j) {
+		for (int i = 0; i < rows; i++) {
+			if (board[i][j] == 1 || board[i][j] == 2) {
+				board[i][j] = 0;
+				break;
+			}
+		}
+	}
+
+	public int heuristic(int player, int lastRowLoc, int lastColLoc) {
+		if (player == 1) {
+			if (checkUserWin(lastRowLoc, lastColLoc)) {
+				return -1;
+			}
+		}
+		if (player == 2) {
+			if (checkCompWin(lastRowLoc, lastColLoc)) {
+				return 1;
+			}
+		}
+		return 0;
+	}
+
+	public boolean isFull(int c) {
+		if (board[0][c] != 0)
+			return true;
+		else
+			return false;
 	}
 
 	public boolean checkUserWin(int r, int c) {

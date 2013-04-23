@@ -271,14 +271,18 @@ public class Connect4Window extends javax.swing.JFrame implements
 				System.out.print("You Win!");
 			}
 			if(random.isSelected()) {
-				int compCol = board.randomDrop();
-				int compRow = board.dropCompPiece(compCol);
+//				int compCol = board.randomDrop();
+//				int compRow = board.dropComp(compCol);
+//				grid[compRow][compCol].setBackground(new java.awt.Color(0, 0,
+//						0));
+				int compCol = board.minimax(6);
+				int compRow = board.dropComp(compCol);
 				grid[compRow][compCol].setBackground(new java.awt.Color(0, 0,
 						0));
 			}
 			if(minmax.isSelected()) {
 				int compCol = board.randomWithDefenseDrop();
-				int compRow = board.dropCompPiece(compCol);
+				int compRow = board.dropComp(compCol);
 				grid[compRow][compCol].setBackground(new java.awt.Color(0, 0,
 						0));
 			}
