@@ -278,8 +278,7 @@ public class Connect4Window extends javax.swing.JFrame implements
 						3, true));
 				{
 					createGrid();
-					board = new GameBoard(r, c, Integer.parseInt(numConnect
-							.getText()));
+					board = new GameBoard(r, c, Integer.parseInt(numConnect.getText()));
 
 				}
 			}
@@ -316,20 +315,20 @@ public class Connect4Window extends javax.swing.JFrame implements
 		if (rowLoc != -1) {
 			grid[rowLoc][dropLoc].setBackground(new java.awt.Color(0, 0,
 					255));
-			if (board.checkUserWin(rowLoc, dropLoc)) {
-				System.out.print("You Win!");
+			if (board.isWin(1)) {
+				System.out.println("You Win!");
 			}
-			if (random.isSelected()) {
+			if (minmax.isSelected()) {
 				// int compCol = board.randomDrop();
 				// int compRow = board.dropComp(compCol);
 				// grid[compRow][compCol].setBackground(new java.awt.Color(0, 0,
 				// 0));
-				int compCol = board.minimax(2);
+				int compCol = board.minimax(3);
 				int compRow = board.dropComp(compCol);
 				grid[compRow][compCol]
 						.setBackground(new java.awt.Color(255,69,0));
 			}
-			if (minmax.isSelected()) {
+			if (random.isSelected()) {
 				int compCol = board.randomWithDefenseDrop();
 				int compRow = board.dropComp(compCol);
 				grid[compRow][compCol]
@@ -340,9 +339,9 @@ public class Connect4Window extends javax.swing.JFrame implements
 			// grid[compRowLoc][compColLoc].setBackground(new java.awt.Color(0,
 			// 0,
 			// 0));
-			// if(board.checkCompWin(compRowLoc, compColLoc)) {
-			// System.out.print("Computer Wins!");
-			// }
+			if(board.isWin(2)) {
+			System.out.println("Computer Wins!");
+			}
 		}
 		//board.print();
 
