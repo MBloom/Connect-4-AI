@@ -16,6 +16,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
@@ -28,7 +29,6 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.SwingUtilities;
-
 
 public class Connect4Window extends javax.swing.JFrame implements
 		ActionListener {
@@ -49,11 +49,13 @@ public class Connect4Window extends javax.swing.JFrame implements
 	private GameBoard board;
 	private JLabel connectLabel;
 
-	private JRadioButton random = new JRadioButton("Random", true);
+	private JRadioButton random = new JRadioButton("", true);
 	private JLabel randomLabel = new JLabel("Random");
 	private JRadioButton minmax;
 	private JLabel minmaxLabel = new JLabel("MinMax");
 	private ButtonGroup algorithmsGroup;
+	private JRadioButton randomWithDefense = new JRadioButton("");
+	private JLabel ranWithDefLabel = new JLabel("Random w/ Defense");
 
 	private JRadioButton normGrid = new JRadioButton("Normal Grid", true);
 	private JLabel normGridLabel = new JLabel("Normal Grid");
@@ -62,7 +64,7 @@ public class Connect4Window extends javax.swing.JFrame implements
 	private ButtonGroup typeOfGridGroup;
 	private JTextField custom;
 
-	private String file;
+	private JOptionPane winMessage = new JOptionPane();
 
 	/**
 	 * Auto-generated main method to display this JFrame
@@ -113,14 +115,14 @@ public class Connect4Window extends javax.swing.JFrame implements
 					connectLabel = new JLabel();
 					SettingsPanel.add(connectLabel);
 					connectLabel.setText("Number to Connect:");
-					connectLabel.setBounds(14, 201, 133, 42);
-					connectLabel.setFont(new java.awt.Font("Segoe UI", 0, 12));
+					connectLabel.setBounds(14, 440, 133, 42);
+					connectLabel.setFont(new java.awt.Font("Segoe UI", 0, 14));
 				}
 				{
 					startButton = new JButton();
 					SettingsPanel.add(startButton);
 					startButton.setText("Start Game");
-					startButton.setBounds(7, 518, 112, 63);
+					startButton.setBounds(7, 518, 230, 63);
 					// startButton.addActionListener(this);
 
 					startButton.addActionListener(new ActionListener() {
@@ -152,18 +154,26 @@ public class Connect4Window extends javax.swing.JFrame implements
 								}
 							} else {
 								int[][] customGridTemplate = loadGrid();
-								r = customGridTemplate.length;
-								c = customGridTemplate[0].length;
-								GridLayout gameGridLayout = new GridLayout(r, c);
-								gameGridLayout.setHgap(5);
-								gameGridLayout.setVgap(5);
-								gameGrid.setLayout(gameGridLayout);
-								gameGrid.setBounds(0, 42, 798, 567);
-								gameGrid.setBorder(new LineBorder(
-										new java.awt.Color(0, 0, 0), 3, true));
-								{
-									createCustomGrid(r, c, customGridTemplate);
-									board = new GameBoard(r, c, Integer.parseInt(numConnect.getText()), customGridTemplate);
+								if (customGridTemplate != null) {
+									r = customGridTemplate.length;
+									c = customGridTemplate[0].length;
+									GridLayout gameGridLayout = new GridLayout(
+											r, c);
+									gameGridLayout.setHgap(5);
+									gameGridLayout.setVgap(5);
+									gameGrid.setLayout(gameGridLayout);
+									gameGrid.setBounds(0, 42, 798, 567);
+									gameGrid.setBorder(new LineBorder(
+											new java.awt.Color(0, 0, 0), 3,
+											true));
+									{
+										createCustomGrid(r, c,
+												customGridTemplate);
+										board = new GameBoard(r, c,
+												Integer.parseInt(numConnect
+														.getText()),
+												customGridTemplate);
+									}
 								}
 							}
 							dropButtonsPanel = new JPanel();
@@ -182,12 +192,6 @@ public class Connect4Window extends javax.swing.JFrame implements
 
 					});
 
-				}
-				{
-					restartButton = new JButton();
-					SettingsPanel.add(restartButton);
-					restartButton.setText("Restart Game");
-					restartButton.setBounds(119, 518, 119, 63);
 				}
 				{
 					connectX = new JLabel();
@@ -212,50 +216,55 @@ public class Connect4Window extends javax.swing.JFrame implements
 					numConnect = new JTextField();
 					SettingsPanel.add(numConnect);
 					numConnect.setText("4");
-					numConnect.setBounds(147, 211, 21, 21);
+					numConnect.setBounds(150, 450, 21, 21);
 				}
 				{
-					random.setBounds(100, 358, 20, 20);
 					SettingsPanel.add(random);
 					SettingsPanel.add(randomLabel);
-					randomLabel.setBounds(14, 350, 105, 35);
 					randomLabel.setFont(new java.awt.Font("Segoe UI", 0, 14));
+					randomLabel.setBounds(14, 300, 105, 35);
+					random.setBounds(150, 308, 25, 25);
 
 				}
+
 				{
-					minmax = new JRadioButton("MinMax");
+					SettingsPanel.add(randomWithDefense);
+					SettingsPanel.add(ranWithDefLabel);
+					ranWithDefLabel
+							.setFont(new java.awt.Font("Segoe UI", 0, 14));
+					ranWithDefLabel.setBounds(14, 332, 155, 35);
+					randomWithDefense.setBounds(150, 340, 25, 25);
+				}
+
+				{
+					minmax = new JRadioButton("");
 					SettingsPanel.add(minmax);
 					SettingsPanel.add(minmaxLabel);
 					minmaxLabel.setFont(new java.awt.Font("Segoe UI", 0, 14));
-					minmaxLabel.setBounds(14, 382, 105, 35);
-					minmax.setBounds(100, 390, 20, 20);
+					minmaxLabel.setBounds(14, 364, 105, 35);
+					minmax.setBounds(150, 372, 25, 25);
 				}
+
 				{
 					algorithmsGroup = new ButtonGroup();
 					algorithmsGroup.add(random);
 					algorithmsGroup.add(minmax);
+					algorithmsGroup.add(randomWithDefense);
 				}
 				{
 					custom = new JTextField();
 					SettingsPanel.add(normGrid);
-					SettingsPanel.add(normGridLabel);
 					SettingsPanel.add(customGrid);
-					SettingsPanel.add(customGridLabel);
 					SettingsPanel.add(custom);
 
-					normGridLabel.setFont(new java.awt.Font("Segoe UI",
-							Font.BOLD, 14));
-					customGridLabel.setFont(new java.awt.Font("Segoe UI",
-							Font.BOLD, 14));
+					normGrid.setBounds(10, 83, 180, 25);
+					normGrid.setHorizontalTextPosition(SwingConstants.LEFT);
 
-					normGridLabel.setBounds(14, 75, 105, 35);
-					normGrid.setBounds(120, 83, 20, 20);
-
-					customGridLabel.setBounds(14, 250, 105, 35);
-					customGrid.setBounds(120, 258, 20, 20);
+					customGrid.setBounds(10, 218, 180, 25);
+					customGrid.setHorizontalTextPosition(SwingConstants.LEFT);
 
 					custom.setText("File Name");
-					custom.setBounds(50, 280, 150, 21);
+					custom.setBounds(50, 250, 150, 21);
 
 				}
 				{
@@ -278,7 +287,8 @@ public class Connect4Window extends javax.swing.JFrame implements
 						3, true));
 				{
 					createGrid();
-					board = new GameBoard(r, c, Integer.parseInt(numConnect.getText()));
+					board = new GameBoard(r, c, Integer.parseInt(numConnect
+							.getText()));
 
 				}
 			}
@@ -310,43 +320,72 @@ public class Connect4Window extends javax.swing.JFrame implements
 		int r = Integer.parseInt(rows.getText());
 		String loc = e.getActionCommand();
 		int dropLoc = Integer.parseInt(loc);
-		//System.out.println(dropLoc);
+		// System.out.println(dropLoc);
 		int rowLoc = board.dropUser(dropLoc);
 		if (rowLoc != -1) {
-			grid[rowLoc][dropLoc].setBackground(new java.awt.Color(0, 0,
-					255));
+			grid[rowLoc][dropLoc].setBackground(new java.awt.Color(0, 0, 255));
 			if (board.isWin(1)) {
-				System.out.println("You Win!");
-			}
-			if (minmax.isSelected()) {
-				// int compCol = board.randomDrop();
-				// int compRow = board.dropComp(compCol);
-				// grid[compRow][compCol].setBackground(new java.awt.Color(0, 0,
-				// 0));
-				int compCol = board.minimax(3);
-				int compRow = board.dropComp(compCol);
-				grid[compRow][compCol]
-						.setBackground(new java.awt.Color(255,69,0));
+				String[] choices = { "Restart", "Quit" };
+				int response = JOptionPane.showOptionDialog(null, "You Win!",
+						"Game Over", JOptionPane.YES_NO_OPTION,
+						JOptionPane.PLAIN_MESSAGE, null, choices, "Restart");
+				// ... Use a switch statement to check which button was clicked.
+				switch (response) {
+				case 0:
+					startButton.doClick();
+					break;
+				case 1:
+					System.exit(0);
+					break;
+				default:
+					// ... If we get here, something is wrong. Defensive
+					// programming.
+					JOptionPane.showMessageDialog(null, "Unexpected response "
+							+ response);
+				}
+				return;
 			}
 			if (random.isSelected()) {
+				int compCol = board.randomDrop();
+				int compRow = board.dropComp(compCol);
+				grid[compRow][compCol].setBackground(new java.awt.Color(255,
+						69, 0));
+			}
+			if (randomWithDefense.isSelected()) {
 				int compCol = board.randomWithDefenseDrop();
 				int compRow = board.dropComp(compCol);
-				grid[compRow][compCol]
-						.setBackground(new java.awt.Color(255,69,0));
+				grid[compRow][compCol].setBackground(new java.awt.Color(255,
+						69, 0));
 			}
-			// int compColLoc = board.dropComp(1);
-			// int compRowLoc = board.dropCompPiece(compColLoc);
-			// grid[compRowLoc][compColLoc].setBackground(new java.awt.Color(0,
-			// 0,
-			// 0));
-			if(board.isWin(2)) {
-			System.out.println("Computer Wins!");
+			if (minmax.isSelected()) {
+				int compCol = board.minimax(3);
+				int compRow = board.dropComp(compCol);
+				grid[compRow][compCol].setBackground(new java.awt.Color(255,
+						69, 0));
+			}
+			if (board.isWin(2)) {
+				String[] choices = { "Restart", "Quit" };
+				int response = JOptionPane.showOptionDialog(null,
+						"Computer Wins!", "Game Over",
+						JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE,
+						null, choices, "Restart");
+				// ... Use a switch statement to check which button was clicked.
+				switch (response) {
+				case 0:
+					startButton.doClick();
+					break;
+				case 1:
+					System.exit(0);
+					break;
+				default:
+					// ... If we get here, something is wrong. Defensive
+					// programming.
+					JOptionPane.showMessageDialog(null, "Unexpected response "
+							+ response);
+				}
+				return;
 			}
 		}
-		//board.print();
-
-		// grid[r-1][dropLoc].setBackground(new java.awt.Color(255,100,100));
-
 	}
 
 	public void createGrid() {
@@ -373,8 +412,7 @@ public class Connect4Window extends javax.swing.JFrame implements
 				grid[i][k].setBorder(new LineBorder(
 						new java.awt.Color(0, 0, 0), 2, false));
 				if (template[i][k] == 3) {
-					grid[i][k].setBackground(new java.awt.Color(0,
-							0, 0));
+					grid[i][k].setBackground(new java.awt.Color(0, 0, 0));
 				}
 			}
 		}
@@ -399,18 +437,22 @@ public class Connect4Window extends javax.swing.JFrame implements
 			sCurrentLine = br.readLine();
 			int loc = sCurrentLine.indexOf('x');
 			int numRow = Integer.parseInt(sCurrentLine.substring(0, loc));
-			int numCol = Integer.parseInt(sCurrentLine.substring(loc+1,sCurrentLine.length()));
+			int numCol = Integer.parseInt(sCurrentLine.substring(loc + 1,
+					sCurrentLine.length()));
 			int[][] tempGrid = new int[numRow][numCol];
 			int count = 0;
 			while ((sCurrentLine = br.readLine()) != null) {
 				for (int i = 0; i < sCurrentLine.length(); i++) {
-					tempGrid[count][i] = Integer.parseInt(Character.toString(sCurrentLine.charAt(i)));
+					tempGrid[count][i] = Integer.parseInt(Character
+							.toString(sCurrentLine.charAt(i)));
 				}
 				count++;
 			}
 			return tempGrid;
 		} catch (IOException e) {
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Error: File Not Found",
+					"ERROR", JOptionPane.ERROR_MESSAGE);
+			return null;
 		} finally {
 			try {
 				if (br != null)
@@ -419,6 +461,5 @@ public class Connect4Window extends javax.swing.JFrame implements
 				ex.printStackTrace();
 			}
 		}
-		return null;
 	}
 }
