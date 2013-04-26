@@ -321,7 +321,7 @@ public class Connect4Window extends javax.swing.JFrame implements
 		String loc = e.getActionCommand();
 		int dropLoc = Integer.parseInt(loc);
 		// System.out.println(dropLoc);
-		int rowLoc = board.dropUser(dropLoc);
+		int rowLoc = board.drop(dropLoc, 1);
 		if (rowLoc != -1) {
 			grid[rowLoc][dropLoc].setBackground(new java.awt.Color(0, 0, 255));
 			if (board.isWin(1)) {
@@ -347,19 +347,19 @@ public class Connect4Window extends javax.swing.JFrame implements
 			}
 			if (random.isSelected()) {
 				int compCol = board.randomDrop();
-				int compRow = board.dropComp(compCol);
+				int compRow = board.drop(compCol, 2);
 				grid[compRow][compCol].setBackground(new java.awt.Color(255,
 						69, 0));
 			}
 			if (randomWithDefense.isSelected()) {
 				int compCol = board.randomWithDefenseDrop();
-				int compRow = board.dropComp(compCol);
+				int compRow = board.drop(compCol, 2);
 				grid[compRow][compCol].setBackground(new java.awt.Color(255,
 						69, 0));
 			}
 			if (minmax.isSelected()) {
-				int compCol = board.minimax(3);
-				int compRow = board.dropComp(compCol);
+				int compCol = board.minimax(3, 2);
+				int compRow = board.drop(compCol, 2);
 				grid[compRow][compCol].setBackground(new java.awt.Color(255,
 						69, 0));
 			}

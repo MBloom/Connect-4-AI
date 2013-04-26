@@ -5,8 +5,8 @@ public class GameBoard {
 	private int columns;
 	private int[][] board;
 	private int connect;
-	private int max = 100;
-	private int min = -100;
+	private int maxVal = Integer.MAX_VALUE;
+	private int minVal = -(Integer.MAX_VALUE);
 
 	public GameBoard(int r, int c, int num) {
 		rows = r;
@@ -32,20 +32,10 @@ public class GameBoard {
 		}
 	}
 
-	public int dropUser(int col) {
+	public int drop(int col, int player) {
 		for (int k = rows - 1; k >= 0; k--) {
 			if (board[k][col] == 0) {
-				board[k][col] = 1;
-				return k;
-			}
-		}
-		return -1;
-	}
-
-	public int dropComp(int col) {
-		for (int k = rows - 1; k >= 0; k--) {
-			if (board[k][col] == 0) {
-				board[k][col] = 2;
+				board[k][col] = player;
 				return k;
 			}
 		}
@@ -54,7 +44,7 @@ public class GameBoard {
 
 	public int randomDrop() {
 		for (int i = 0; i < columns; i++) {
-			int rowLoc = dropComp(i);
+			int rowLoc = drop(i, 2);
 			if (rowLoc != -1) {
 				board[rowLoc][i] = 2;
 				if (isWin(2)) {
@@ -70,7 +60,7 @@ public class GameBoard {
 
 	public int randomWithDefenseDrop() {
 		for (int i = 0; i < columns; i++) {
-			int rowLoc = dropComp(i);
+			int rowLoc = drop(i, 2);
 			if (rowLoc != -1) {
 				board[rowLoc][i] = 2;
 				if (isWin(2)) {
@@ -81,7 +71,7 @@ public class GameBoard {
 			}
 		}
 		for (int i = 0; i < columns; i++) {
-			int rowLoc = dropUser(i);
+			int rowLoc = drop(i, 1);
 			if (rowLoc != -1) {
 				board[rowLoc][i] = 1;
 				if (isWin(2)) {
@@ -96,17 +86,22 @@ public class GameBoard {
 	}
 
 	/************************* MINIMAX CODE ************************************/
-	public int minimax(int diff) {
+	public int minimax(int diff, int player) {
 		if (diff == 0)
 			return -1;
-		int bestDecision = Integer.MIN_VALUE;
-		int bestCol = 0;
+		int bestDecision = minVal;
+		int bestCol = 0; 
+		int curValue = 0;
 		for (int j = 0; j < columns; j++) {
 			if (!isFull(j)) {
-				int lastRow = dropComp(j);
-				int decision = userRecursion(diff - 1, bestDecision);
-				if (decision > bestDecision) {
-					bestDecision = decision;
+				int lastRow = drop(j, player);
+				if(isWin(player)){
+					undoMove(j);
+					return j;
+				}
+				curValue = eval(player, diff, minVal, -bestDecision);
+				if (curValue > bestDecision) {
+					bestDecision = curValue;
 					bestCol = j;
 				}
 				undoMove(j);
@@ -115,48 +110,84 @@ public class GameBoard {
 		return bestCol;
 	}
 
-	public int userRecursion(int diff, int prevMin) {
-		if (diff == 0)
-			return heuristic(1);
-		int bestCompDecision = Integer.MIN_VALUE;
-		for (int j = 0; j < columns; j++) {
-			if (!isFull(j)) {
-				int lastRow = dropUser(j);
-				int decision = compRecursion(diff - 1, bestCompDecision);
-				if(decision > prevMin){
+	public int eval(int player, int diff, int alpha, int beta){
+		if(isWin(player))
+			return maxVal - diff;
+		else if(isWin(other(player)))
+			return -(maxVal-diff);
+		else if(diff == 0)
+			return heuristic(player);
+		else {
+			int best = minVal;
+			int maxAB = alpha;
+			for (int j = 0; j < columns; j++){
+				if (!isFull(j)){
+					int lastRow = drop(j, other(player));
+					int curValue = eval(other(player), diff - 1, -beta, -maxAB);
+					if (curValue > best){
+						best = curValue;
+						if(best > maxAB)
+							maxAB = best;
+					}
 					undoMove(j);
-					return decision;
+					if(best > beta)
+						break;
 				}
-				if (bestCompDecision < decision) {
-					bestCompDecision = decision;
-				}
-				undoMove(j);
 			}
+			return -best;
 		}
-		return bestCompDecision;
 	}
-
-	public int compRecursion(int diff, int prevMax) {
+	/*
+	//computer just dropped a piece, now evaluating user's move
+	public int minRecursion(int diff, int alpha, int beta) {
 		if (diff == 0)
 			return heuristic(2);
-		int bestUserDecision = Integer.MAX_VALUE;
+		int bestDecision = minVal;
+		int maxPos = alpha;
 		for (int j = 0; j < columns; j++) {
 			if (!isFull(j)) {
-				int rowLoc = dropComp(j);
-				int decision = userRecursion(diff - 1, bestUserDecision);
-				if(decision < prevMax){
-					undoMove(j);
-					return decision;
-				}
-				if (decision < bestUserDecision) {
-					bestUserDecision = decision;
+				int lastRow = drop(j, 1);
+				if(isWin(1))
+					return -(maxVal - diff);
+				int decision = maxRecursion(diff - 1, -beta, -maxPos);
+				if (bestDecision < decision) {
+					bestDecision = decision;
+					if(bestDecision > maxPos)
+						maxPos = bestDecision;
 				}
 				undoMove(j);
+				if(bestDecision > beta)
+					break;
 			}
 		}
-		return bestUserDecision;
+		return -bestDecision;
 	}
 
+	//user just dropped a piece, now evaluating computer's move
+	public int maxRecursion(int diff, int alpha, int beta) {
+		if (diff == 0)
+			return heuristic(1);
+		int bestDecision = minVal;
+		int maxPos = alpha;
+		for (int j = 0; j < columns; j++) {
+			if (!isFull(j)) {
+				int lastRow = drop(j, 2);
+				if(isWin(2))
+					return -(maxVal - diff);
+				int decision = minRecursion(diff - 1, -beta, -maxPos);
+				if (bestDecision < decision) {
+					bestDecision = decision;
+					if(bestDecision > maxPos)
+						maxPos = bestDecision;
+				}
+				undoMove(j);
+				if(bestDecision > beta)
+					break;
+			}
+		}
+		return -bestDecision;
+	}
+*/
 	public void undoMove(int j) {
 		for (int i = 0; i < rows; i++) {
 			if (board[i][j] == 1 || board[i][j] == 2) {
@@ -168,22 +199,13 @@ public class GameBoard {
 
 	public int heuristic(int player) {
 		int value = 0;
-		if(isWin(player)){
-			if(player == 1)
+		if(isWin(player))
 				return Integer.MAX_VALUE;
-			else
-				return Integer.MIN_VALUE;
-		}
 		else{
 			int threeStreak = streakCount(player, 3);
 			int twoStreak = streakCount(player, 2);
 			value = threeStreak*10000 + twoStreak*10;
 		}
-		
-		//make negative if computers value
-		if(player == 2)
-			return value*-1;
-	
 		return value;
 	}
 	
@@ -322,7 +344,13 @@ public class GameBoard {
 				
 	    }//end checkWinner
 	
-	
+	public int other(int player){
+		if(player == 1)
+			return 2;
+		else if(player == 2)
+			return 1;
+		return -1;
+	}
 //	public boolean checkUserWin(int r, int c) {
 //
 //		int count = 0;
