@@ -63,8 +63,14 @@ public class Connect4Window extends javax.swing.JFrame implements
 	private JLabel customGridLabel = new JLabel("Custom Grid");
 	private ButtonGroup typeOfGridGroup;
 	private JTextField custom;
+	
+	private JTextField diff;
+	private JLabel diffLabel;
 
 	private JOptionPane winMessage = new JOptionPane();
+	
+	private int size; 
+	private int count;
 
 	/**
 	 * Auto-generated main method to display this JFrame
@@ -140,6 +146,8 @@ public class Connect4Window extends javax.swing.JFrame implements
 							if (normGrid.isSelected()) {
 								c = Integer.parseInt(columns.getText());
 								r = Integer.parseInt(rows.getText());
+								size  = c * r;
+								count = 0;
 								GridLayout gameGridLayout = new GridLayout(r, c);
 								gameGridLayout.setHgap(5);
 								gameGridLayout.setVgap(5);
@@ -157,6 +165,8 @@ public class Connect4Window extends javax.swing.JFrame implements
 								if (customGridTemplate != null) {
 									r = customGridTemplate.length;
 									c = customGridTemplate[0].length;
+									size = r * c;
+									count = 0;
 									GridLayout gameGridLayout = new GridLayout(
 											r, c);
 									gameGridLayout.setHgap(5);
@@ -272,12 +282,25 @@ public class Connect4Window extends javax.swing.JFrame implements
 					typeOfGridGroup.add(customGrid);
 					typeOfGridGroup.add(normGrid);
 				}
+				{
+					diff = new JTextField("3");
+					diffLabel = new JLabel("Difficulty: ");
+					diffLabel.setFont(new java.awt.Font("Segoe UI", 0, 14));
+					SettingsPanel.add(diff);
+					SettingsPanel.add(diffLabel);
+					diff.setBounds(150,400,20,20);
+					diffLabel.setBounds(75, 395, 100, 25);
+					
+
+				}
 			}
 			{
 				gameGrid = new JPanel();
 				getContentPane().add(gameGrid);
 				int c = Integer.parseInt(columns.getText());
 				int r = Integer.parseInt(rows.getText());
+				size = r * c;
+				count = 0;
 				GridLayout gameGridLayout = new GridLayout(r, c);
 				gameGridLayout.setHgap(5);
 				gameGridLayout.setVgap(5);
@@ -324,6 +347,7 @@ public class Connect4Window extends javax.swing.JFrame implements
 		int rowLoc = board.drop(dropLoc, 1);
 		if (rowLoc != -1) {
 			grid[rowLoc][dropLoc].setBackground(new java.awt.Color(0, 0, 255));
+			count ++;
 			if (board.isWin(1)) {
 				String[] choices = { "Restart", "Quit" };
 				int response = JOptionPane.showOptionDialog(null, "You Win!",
@@ -345,23 +369,49 @@ public class Connect4Window extends javax.swing.JFrame implements
 				}
 				return;
 			}
+			if(count == size) {
+				String[] choices = { "Restart", "Quit" };
+				int response = JOptionPane.showOptionDialog(null, "Tie!",
+						"Game Over", JOptionPane.YES_NO_OPTION,
+						JOptionPane.PLAIN_MESSAGE, null, choices, "Restart");
+				// ... Use a switch statement to check which button was clicked.
+				switch (response) {
+				case 0:
+					startButton.doClick();
+					break;
+				case 1:
+					System.exit(0);
+					break;
+				default:
+					// ... If we get here, something is wrong. Defensive
+					// programming.
+					JOptionPane.showMessageDialog(null, "Unexpected response "
+							+ response);
+				}
+				return;
+			}
+			
 			if (random.isSelected()) {
 				int compCol = board.randomDrop();
 				int compRow = board.drop(compCol, 2);
 				grid[compRow][compCol].setBackground(new java.awt.Color(255,
 						69, 0));
+				count++;
 			}
 			if (randomWithDefense.isSelected()) {
 				int compCol = board.randomWithDefenseDrop();
 				int compRow = board.drop(compCol, 2);
 				grid[compRow][compCol].setBackground(new java.awt.Color(255,
 						69, 0));
+				count++;
 			}
 			if (minmax.isSelected()) {
-				int compCol = board.minimax(3, 2);
+				int compCol = board.minimax(Integer.parseInt(diff.getText()), 2);
 				int compRow = board.drop(compCol, 2);
 				grid[compRow][compCol].setBackground(new java.awt.Color(255,
 						69, 0));
+				board.print();
+				count++;
 			}
 			if (board.isWin(2)) {
 				String[] choices = { "Restart", "Quit" };
@@ -369,6 +419,27 @@ public class Connect4Window extends javax.swing.JFrame implements
 						"Computer Wins!", "Game Over",
 						JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE,
 						null, choices, "Restart");
+				// ... Use a switch statement to check which button was clicked.
+				switch (response) {
+				case 0:
+					startButton.doClick();
+					break;
+				case 1:
+					System.exit(0);
+					break;
+				default:
+					// ... If we get here, something is wrong. Defensive
+					// programming.
+					JOptionPane.showMessageDialog(null, "Unexpected response "
+							+ response);
+				}
+				return;
+			}
+			if(count == size) {
+				String[] choices = { "Restart", "Quit" };
+				int response = JOptionPane.showOptionDialog(null, "Tie!",
+						"Game Over", JOptionPane.YES_NO_OPTION,
+						JOptionPane.PLAIN_MESSAGE, null, choices, "Restart");
 				// ... Use a switch statement to check which button was clicked.
 				switch (response) {
 				case 0:
@@ -413,6 +484,7 @@ public class Connect4Window extends javax.swing.JFrame implements
 						new java.awt.Color(0, 0, 0), 2, false));
 				if (template[i][k] == 3) {
 					grid[i][k].setBackground(new java.awt.Color(0, 0, 0));
+					size--;
 				}
 			}
 		}

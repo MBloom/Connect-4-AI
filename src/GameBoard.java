@@ -55,7 +55,12 @@ public class GameBoard {
 			}
 		}
 		Random generator = new Random();
-		return generator.nextInt(columns);
+		while(true){
+			int temp = generator.nextInt(columns);
+			if(!isFull(temp)) {
+				return temp;
+			}
+		}
 	}
 
 	public int randomWithDefenseDrop() {
@@ -137,57 +142,7 @@ public class GameBoard {
 			return -best;
 		}
 	}
-	/*
-	//computer just dropped a piece, now evaluating user's move
-	public int minRecursion(int diff, int alpha, int beta) {
-		if (diff == 0)
-			return heuristic(2);
-		int bestDecision = minVal;
-		int maxPos = alpha;
-		for (int j = 0; j < columns; j++) {
-			if (!isFull(j)) {
-				int lastRow = drop(j, 1);
-				if(isWin(1))
-					return -(maxVal - diff);
-				int decision = maxRecursion(diff - 1, -beta, -maxPos);
-				if (bestDecision < decision) {
-					bestDecision = decision;
-					if(bestDecision > maxPos)
-						maxPos = bestDecision;
-				}
-				undoMove(j);
-				if(bestDecision > beta)
-					break;
-			}
-		}
-		return -bestDecision;
-	}
 
-	//user just dropped a piece, now evaluating computer's move
-	public int maxRecursion(int diff, int alpha, int beta) {
-		if (diff == 0)
-			return heuristic(1);
-		int bestDecision = minVal;
-		int maxPos = alpha;
-		for (int j = 0; j < columns; j++) {
-			if (!isFull(j)) {
-				int lastRow = drop(j, 2);
-				if(isWin(2))
-					return -(maxVal - diff);
-				int decision = minRecursion(diff - 1, -beta, -maxPos);
-				if (bestDecision < decision) {
-					bestDecision = decision;
-					if(bestDecision > maxPos)
-						maxPos = bestDecision;
-				}
-				undoMove(j);
-				if(bestDecision > beta)
-					break;
-			}
-		}
-		return -bestDecision;
-	}
-*/
 	public void undoMove(int j) {
 		for (int i = 0; i < rows; i++) {
 			if (board[i][j] == 1 || board[i][j] == 2) {
@@ -254,7 +209,7 @@ public class GameBoard {
 		int j = col;
 		
 		for(int i = row; i < rows; i++){
-			if(j > rows) break;
+			if(j >= columns) break;
 			else if(board[i][j] == player)
 				streakCount++;
 			else break;
@@ -268,7 +223,7 @@ public class GameBoard {
 		streakCount = 0;
 		j = col;
 		for(int i = row; i >= 0; i--){
-			if(j > rows) break;
+			if(j >= columns) break;
 			else if(board[i][j] == player)
 				streakCount++;
 			else break;
@@ -287,62 +242,6 @@ public class GameBoard {
 		else
 			return false;
 	}
-
-	/**************************/
-	public boolean isWin(int player) {
-		boolean win = false;
-			//check for win horizontally
-			for (int row=0; row<rows; row++) {
-			    for (int col=0; col<columns-3; col++) {
-					if (board[row][col] == player &&	
-						board[row][col] == board[row][col+1] &&
-					    board[row][col] == board[row][col+2] &&
-					    board[row][col] == board[row][col+3] &&
-					    board[row][col] != 0) {
-					    win = true;
-					}
-				}
-			}
-			//check for win vertically
-			for (int row=0; row<rows-3; row++) {
-			    for (int col=0; col<columns; col++) {
-					if (board[row][col] == player &&
-						board[row][col] == board[row+1][col] &&
-					    board[row][col] == board[row+2][col] &&
-					    board[row][col] == board[row+3][col] &&
-					    board[row][col] != 0) {
-					    win = true;
-					}
-			    }
-			}
-			//check for win diagonally (upper left to lower right)
-			for (int row=0; row<rows-3; row++) { 
-			    for (int col=0; col<columns-3; col++) {
-					if (board[row][col] == player &&
-						board[row][col] == board[row+1][col+1] &&
-					    board[row][col] == board[row+2][col+2] &&
-					    board[row][col] == board[row+3][col+3] &&
-					    board[row][col] != 0) {
-					    win = true;
-					}
-			    }
-			}
-			//check for win diagonally (lower left to upper right)
-			for (int row=3; row<rows; row++) { 
-			    for (int col=0; col<columns-3; col++) { 
-					if (board[row][col] == player &&
-						board[row][col] == board[row-1][col+1] &&
-					    board[row][col] == board[row-2][col+2] &&
-					    board[row][col] == board[row-3][col+3] &&
-					    board[row][col] != 0) {
-					    win = true;
-					}
-			    }
-			}
-
-			return win;
-				
-	    }//end checkWinner
 	
 	public int other(int player){
 		if(player == 1)
@@ -351,62 +250,87 @@ public class GameBoard {
 			return 1;
 		return -1;
 	}
-//	public boolean checkUserWin(int r, int c) {
-//
-//		int count = 0;
-//		// Check Horizontal for Win
-//		for (int i = 0; i < columns - 1; i++) {
-//			if (board[r][i] == 1 && board[r][i + 1] == 1) {
-//				count++;
-//			} else
-//				count = 0;
-//			if (count == connect - 1)
-//				return true;
-//		}
-//
-//		// Check verticle for Win
-//		for (int i = 0; i < rows - 1; i++) {
-//			if (board[i][c] == 1 && board[i + 1][c] == 1) {
-//				count++;
-//			} else
-//				count = 0;
-//			if (count == connect - 1)
-//				return true;
-//		}
-//
-//		// Check right to bottom diagonal.
-//		count = 0;
-//		for (int i = -connect + 1; i < connect; i++) {
-//			if (r + i >= 0 && r + i + 1 < rows && c + i >= 0
-//					&& c + i + 1 < columns) {
-//				if (board[r + i][c + i] == 1
-//						&& board[r + i + 1][c + i + 1] == 1) {
-//					count++;
-//				} else
-//					count = 0;
-//				if (count == connect - 1)
-//					return true;
-//			}
-//		}
-//
-//		// Check right to top diagonal
-//		count = 0;
-//		int i;
-//		int k;
-//		for (i = connect - 1, k = -connect + 1; i > -connect && k < connect; i--, k++) {
-//			if (r + i - 1 >= 0 && r + i < rows && k + c + 1 < columns
-//					&& k + c >= 0) {
-//				if (board[r + i][c + k] == 1
-//						&& board[r + i - 1][c + k + 1] == 1) {
-//					count++;
-//				} else
-//					count = 0;
-//				if (count == connect - 1)
-//					return true;
-//			}
-//		}
-//		return false;
-//	}
+	
+	public boolean isWin(int player) {
+		for(int row = 0; row < rows; row++) {
+			int count = 0;
+			for(int col = 0; col < columns-1; col++) {
+				if(board[row][col] == player && board[row][col+1] == player)
+					count++;
+				else
+					count = 0;
+				if(count == connect-1) {
+					return true;
+				}
+			}
+		}
+		for(int col = 0; col < columns; col++) {
+			int count = 0;
+			for(int row = 0; row < rows-1; row++) {
+				if(board[row][col] == player && board[row+1][col] == player)
+					count++;
+				else
+					count = 0;
+				if(count == connect-1) {
+					return true;
+				}
+			}
+		}
+		for(int r = 0; r < rows; r++) {
+			int row;
+			int col;
+			int count = 0;
+			for(row = r, col = 0; row > 0 && col < columns-1; row--, col++) {
+				if(board[row][col] == player && board[row-1][col+1] == player)
+					count++;
+				else
+					count = 0;
+				if(count == connect-1)
+					return true;
+			}
+		}
+		for(int c = 0; c < columns; c++) {
+			int row;
+			int col;
+			int count = 0;
+			for(col = c, row = rows-1; row > 0 && col < columns - 1; row--, col++) {
+				if(board[row][col] == player && board[row-1][col+1] == player)
+					count++;
+				else
+					count = 0;
+				if(count == connect-1)
+					return true;
+			}
+		}
+		for(int c = 0; c < columns; c++) {
+			int row;
+			int col;
+			int count = 0;
+			for(col = c, row = rows-1; row > 0 && col > 0; row--, col--) {
+				if(board[row][col] == player && board[row-1][col-1] == player)
+					count++;
+				else
+					count = 0;
+				if(count == connect-1)
+					return true;
+			}
+		}
+		for(int r = 0; r < rows; r++) {
+			int row;
+			int col;
+			int count = 0;
+			for(row = r, col = columns-1; row > 0 && col > 0; row--, col--) {
+				if(board[row][col] == player && board[row-1][col-1] == player)
+					count++;
+				else
+					count = 0;
+				if(count == connect-1)
+					return true;
+			}
+		}
+		return false;
+	}
+
 
 	public void print() {
 		for (int i = 0; i < rows; i++) {
@@ -416,61 +340,4 @@ public class GameBoard {
 			System.out.println();
 		}
 	}
-
-//	public boolean checkCompWin(int r, int c) {
-//		int count = 0;
-//		// Check Horizontal for Win
-//		for (int i = 0; i < columns - 1; i++) {
-//			if (board[r][i] == 2 && board[r][i + 1] == 2) {
-//				count++;
-//			} else
-//				count = 0;
-//			if (count == connect - 1)
-//				return true;
-//		}
-//
-//		// Check verticle for Win
-//		for (int i = 0; i < rows - 1; i++) {
-//			if (board[i][c] == 2 && board[i + 1][c] == 2) {
-//				count++;
-//			} else
-//				count = 0;
-//			if (count == connect - 1)
-//				return true;
-//		}
-//
-//		// Check right to bottom diagonal.
-//		count = 0;
-//		for (int i = -connect + 1; i < connect; i++) {
-//			if (r + i >= 0 && r + i + 1 < rows && c + i >= 0
-//					&& c + i + 1 < columns) {
-//				if (board[r + i][c + i] == 2
-//						&& board[r + i + 1][c + i + 1] == 2) {
-//					count++;
-//				} else
-//					count = 0;
-//				if (count == connect - 1)
-//					return true;
-//			}
-//		}
-//
-//		// Check right to top diagonal
-//		count = 0;
-//		int i;
-//		int k;
-//		for (i = connect - 1, k = -connect + 1; i > -connect && k < connect; i--, k++) {
-//			if (r + i - 1 >= 0 && r + i < rows && k + c + 1 < columns
-//					&& k + c >= 0) {
-//				if (board[r + i][c + k] == 2
-//						&& board[r + i - 1][c + k + 1] == 2) {
-//					count++;
-//				} else
-//					count = 0;
-//				if (count == connect - 1)
-//					return true;
-//			}
-//		}
-//		return false;
-//
-//	}
 }
